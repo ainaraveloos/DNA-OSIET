@@ -105,18 +105,20 @@
         </div>
       </div>
 
-      <FormSociete ref="formSociete" />
+      <FormSociete_ ref="formSociete" />
 
     </AppSidebarLayout>
   </template>
 
   <script setup lang="ts">
-  import BaseTable from "@/components/BaseTable.vue";
+  import BaseTable from "@/components/BaseTable/BaseTable.vue";
 import Bouton from "@/components/utils/Bouton.vue";
 import AppSidebarLayout from "@/layouts/app/AppSidebarLayout.vue";
 import type { FormInstance } from "ant-design-vue";
 import { Tag } from "ant-design-vue";
 import { computed, h, reactive, ref } from "vue";
+import FormSociete_ from './FormSociete_.vue';
+
 
   interface TableItem {
     id: number;
@@ -255,13 +257,13 @@ import { computed, h, reactive, ref } from "vue";
   }
 
 
-  import FormSociete from './FormSociete.vue';
+
 
   const formSociete = ref<any>(null)
 
   function openForm() {
     if (formSociete.value) {
-      formSociete.value.visible = true
+      formSociete.value.open()
     }
   }
 
