@@ -124,6 +124,7 @@ return [
     ],
 
     'pagination' => [
+        
         'per_page' => env('LIST_PER_PAGE', 20)
     ]
 
