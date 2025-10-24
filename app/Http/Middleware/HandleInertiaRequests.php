@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use Illuminate\Support\Facades\Session;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -52,6 +53,10 @@ class HandleInertiaRequests extends Middleware
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'appearance' => session('appearance', $request->cookie('appearance', 'system')),
+            //Mettre le flash data dans la session
+            'flash' => [
+                "data" => Session::get("data"),
+            ],
         ];
     }
 }

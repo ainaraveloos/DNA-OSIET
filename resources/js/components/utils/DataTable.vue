@@ -339,7 +339,6 @@ onMounted(() => {
     props.columns.push({
       title: 'Actions',
       key: 'action',
-      width: 120,
       align: 'center',
       customCell: () => ({ class: 'fixed-column' }),
     });

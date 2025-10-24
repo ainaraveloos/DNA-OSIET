@@ -179,9 +179,8 @@ const visibleActions = (record: any): Action<any>[] => {
 }
 
 .custom-table :deep(.ant-table-thead > tr > th) {
-    background-color: rgb(70, 166, 99) !important;
-
     padding: 8px !important;
+    background-color: rgb(70, 166, 99) !important;
     color: #ffffff !important;
     white-space: nowrap !important;
 }
@@ -232,7 +231,7 @@ const visibleActions = (record: any): Action<any>[] => {
                 :pagination="false"
                 :row-key="(record: any) => record.id"
                 sticky
-                :scroll="{ x: 'max-content', y: 'max-content' }"
+                :scroll="{ x: 'max-content', y:400 }"
                 :row-selection="rowSelection"
                 :table-layout="'fixed'"
                 class="custom-table"
