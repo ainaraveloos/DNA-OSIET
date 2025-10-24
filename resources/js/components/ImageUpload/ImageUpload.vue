@@ -25,7 +25,7 @@
                         <!-- Overlay avec bouton supprimer - positionné directement sur l'avatar -->
                         <div
                             v-if="showRemoveButton && image && image !== '/img/placeholder_img.png'"
-                            class="absolute inset-0 flex items-center justify-center !bg-black/50 bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-300 rounded-lg opacity-0 group-hover:opacity-100"
+                            class="absolute inset-0 flex items-center justify-center bg-white/15 bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-300 rounded-lg opacity-0 group-hover:opacity-100"
                             style="width: 224px; height: 224px;"
                         >
                             <a-tooltip placement="top" title="Supprimer l'image">

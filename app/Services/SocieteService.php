@@ -5,10 +5,11 @@ namespace App\Services;
 use App\Repositories\SocieteRepository;
 use App\Services\BaseImgService;
 use App\Services\ImageService;
+use Carbon\Carbon;
 
 class SocieteService extends BaseImgService
 {
-    protected array $scope = ['filter' => 'search'];
+    protected array $scope = ['filter' => 'search','filterstatus' => "status"];
 
     public function __construct(SocieteRepository $societeRepository, ImageService $imageService)
     {
@@ -45,6 +46,7 @@ class SocieteService extends BaseImgService
      */
     public function createSociete(array $validated): array
     {
+        $validated['date_adhesion'] = Carbon::now();
         return $this->createWithImage($validated);
     }
 

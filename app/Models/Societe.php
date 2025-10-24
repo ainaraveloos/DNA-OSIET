@@ -27,6 +27,11 @@ class Societe extends Basemodel
         }
         return $query;
     }
+    public function scopeFilterStatus($query, $status = null)
+    {
+        if(!is_null($status)) $query->where('status',$status);
+        return $query;
+    }
 
     public function getImageUrlAttribute()
     {

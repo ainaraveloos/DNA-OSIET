@@ -4,27 +4,41 @@
             <div class="mx-auto w-full ">
                 <!-- Header -->
                 <a-card bordered :body-style="{ padding: '0' }" class="animate-fade-in-down">
-                   <BaseFilter v-model="props.filters" @search="applyFilters" @reset="resetFilters">
-                    <template #add>
-                <ButtonIcon
-                    @click="() => formSociete.add()"
-                    type="primary"
-                    text="Nouveau Societe"
-                    icon="fa-plus"
-                />
-            </template>
+                    <BaseFilter v-model="filter" @search="applyFilters" @reset="resetFilters">
+                        <template #add>
+                            <a-segmented v-model:value="currentView" :options="[ { label: 'Tableau', value: 'table' }, { label: 'Dossier', value: 'dossier' }]"
+                                size="large"
+                                class="switch-segmented"
+                            />
+                            <ButtonIcon
+                                @click="() => formSociete.add()"
+                                type="primary"
+                                text="Nouveau Societe"
+                                icon="fa-plus"
+                            />
+                        </template>
+                        <template #otherFilter="{ value, updateFilter, apply, close }">
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-600 mb-1">Statut</label>
+                                    <a-select :value="value.status" size="large"  @change="(val) => updateFilter('status', val)" allow-clear
+                                        placeholder="Tous les statuts"
+                                        class="w-full"
+                                    >
+                                        <a-select-option v-for="option in statusOptions" :key="option.value" :value="option.value">
+                                            {{ option.label }}
+                                        </a-select-option>
+                                    </a-select>
+                                </div>
+                            </div>
+                        </template>
                     </BaseFilter>
                 </a-card>
-
-                <!-- CustomTable Desktop -->
-                <div class="animate-fade-in-up hidden overflow-visible rounded-b-lg bg-white shadow-sm lg:block">
-                    <BaseTable
-                        :data="props.data"
-                        :columns="TableColumns"
-                        :actions="TableActions"
-                        :endpoint="route('societe.index')"
-                    />
+                <!-- Table -->
+                <div v-if="currentView === 'table'" key="table-view" class="animate-fade-in-up  overflow-visible rounded-b-lg bg-white shadow-sm">
+                    <BaseTable :data="props.data" :columns="TableColumns" :actions="TableActions" :endpoint="route('societe.index')"/>
                 </div>
+                <div v-else-if="currentView === 'dossier'" key="dossier-view"> Vue dossier </div>
             </div>
         </div>
         <FormSociete_ ref="formSociete" />
@@ -53,53 +67,41 @@ const props = defineProps({
     },
 });
 //Filtre
-const filter = ref({...createSearchFilter()});
+const filter = ref({...createSearchFilter(),status:props.filters.status || null});
 const applyFilters = (data) => {
     const url = route("societe.index");
     gotoSearch(filter.value, url);
 };
 const resetFilters = () => {
-    filter.value = {...createSearchFilter()};
+    filter.value = {...createSearchFilter(),status : null};
     applyFilters();
 };
 
+
+
 // Format pour CustomTable
 const TableColumns = [
-    {
-        key: 'photo',
-        label: 'Logo',
-        width: 80,
-        align: 'center',
+    { key: 'photo', label: 'Logo', width: 80, align: 'center',
         render: (record) => h(ImagePreview, {
             thumbnailUrl: record.thumbnail_url || '/img/placeholder_img.png',
             imageUrl: record.image_url || '/img/placeholder_img.png',
-            alt: `Logo - ${record.name}`
+            alt: record.name
         })
     },
-    { key: 'name', label: 'Nom de la Société', width: 150 },
-    { key: 'secteur', label: "Secteur d'Activité", width: 120 },
+    { key: 'name', label: 'Nom', width: 120 },
+    { key: 'secteur', label: "Secteur", width: 100 },
     { key: 'nif', label: 'NIF', width: 100 },
     { key: 'stat', label: 'STAT', width: 100 },
-    { key: 'telephone', label: 'Téléphone', width: 120 },
-    { key: 'email', label: 'Email', width: 150 },
-    { key: 'status', label: 'Statut', align: 'center', width: 120,
-        render: (record) =>
-            h(
-                Tag,
-                {
-                    color: getStatusColor(record.status),
-                    style: { margin: 0 },
-                },
-                record.status,
-            ),
+    { key: 'telephone', label: 'Téléphone', width: 100 },
+    { key: 'email', label: 'Email', width: 100},
+    { key: 'status', label: 'Statut', align: 'center', width: 100,
+        render: (record) => h( Tag, { color: getStatusColor(record.status), style: { margin: 0 }}, record.status),
     },
-    { key: 'adresse', label: 'Adresse', width: 200 },
+    { key: 'adresse', label: 'Adresse', width: 150 },
 ];
-
-
 // Actions pour CustomTable
 const TableActions = [
-    { label: 'Voir', icon: 'eye', onClick: (item) => formSociete.value.update(item),},
+    { label: 'Archiver', icon: 'eye', onClick: (item) => formSociete.value.update(item),},
     { label: 'Modifier', icon: 'pen', onClick: (item) => formSociete.value.update(item),},
     { label: 'Supprimer', icon: 'trash', onClick: (item) => {
         if (confirm(`Êtes-vous sûr de vouloir supprimer la société "${item.name}" ?`)) {
@@ -107,6 +109,13 @@ const TableActions = [
             console.log('Supprimer:', item)
         }
     }},
+];
+
+// Options pour le filtre statut
+const statusOptions = [
+    { label: 'Actif', value: 'Actif' },
+    { label: 'Inactif', value: 'Inactif' },
+    { label: 'Suspendu', value: 'Suspendu' }
 ];
 
 // Couleur selon Status
@@ -117,27 +126,20 @@ function getStatusColor(status) {
     return 'default';
 }
 
-function handleAddSociete() {
-
-}
-
 const formSociete = ref(null);
 
-function openForm() {
-    if (formSociete.value) {
-        formSociete.value.open();
-    }
-}
+// pour changer de type de vue
+const currentView = ref("table");
 
-// Handle checkbox selection
-function handleSelectionChange(keys) {
-    selectedIds.value = keys;
-}
+// // Handle checkbox selection
+// function handleSelectionChange(keys) {
+//     selectedIds.value = keys;
+// }
 
-// Handle selected items action
-function handleSelectedItems() {
-    alert(`Actions sur les éléments sélectionnés: ${selectedIds.value.join(', ')}`);
-}
+// // Handle selected items action
+// function handleSelectedItems() {
+//     alert(`Actions sur les éléments sélectionnés: ${selectedIds.value.join(', ')}`);
+// }
 </script>
 
 <style scoped>

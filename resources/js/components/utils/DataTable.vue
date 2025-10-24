@@ -206,11 +206,11 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import { router, usePage } from '@inertiajs/vue3';
 import Bouton from "@/components/utils/Bouton.vue";
-import FilterButtons from "./FilterButtons.vue";
+import { router, usePage } from '@inertiajs/vue3';
+import { computed, onMounted, ref } from 'vue';
 import FormSuivi from "../../pages/societe/FormSuivi.vue";
+import FilterButtons from "./FilterButtons.vue";
 
 
 const formSuivi = ref(false)

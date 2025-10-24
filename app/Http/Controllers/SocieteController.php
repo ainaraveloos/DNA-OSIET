@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Societe;
 use App\Services\SocieteService;
-use App\Utils\ExtractFiltre;
+use App\Utils\ExtractSocieteFiltre;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -20,7 +20,7 @@ class SocieteController extends Controller
      */
      public function index(Request $request)
     {
-        $filtre = ExtractFiltre::extractFilter($request);
+        $filtre = ExtractSocieteFiltre::extractFilter($request);
         $data = $this->societeService->getAll($filtre);
         return Inertia::render("Societe/ListedesSociété_",
         [
@@ -118,7 +118,7 @@ class SocieteController extends Controller
             'status' => 'nullable|string|in:Actif,Inactif,Suspendu',
             'img' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120'
         ]);
-        
+
         $result = $this->societeService->updateSociete($societe, $validated);
 
         return back()->with(

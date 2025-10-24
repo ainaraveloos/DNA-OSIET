@@ -210,9 +210,10 @@ const visibleActions = (record: any): Action<any>[] => {
     width: 100% !important;
 }
 
-/*voir les largeurs colonnes */
-.custom-table :deep(.ant-table-thead > tr > th) {
-    position: relative;
+/* Supprimer les separateurs des colonnes des */
+.custom-table :deep(.ant-table-thead .ant-table-cell.ant-table-cell-ellipsis::before) {
+    background-color: transparent !important;
+    display: none !important;
 }
 /* taille du checkbox */
 .custom-table :deep(.ant-checkbox-inner) {
@@ -231,7 +232,7 @@ const visibleActions = (record: any): Action<any>[] => {
                 :pagination="false"
                 :row-key="(record: any) => record.id"
                 sticky
-                :scroll="{ x: 'max-content', y:400 }"
+                :scroll="{ x: 'max-content', y:420 }"
                 :row-selection="rowSelection"
                 :table-layout="'fixed'"
                 class="custom-table"

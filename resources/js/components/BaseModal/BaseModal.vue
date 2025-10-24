@@ -113,7 +113,7 @@ const wrapClassName = computed(() =>
 /* Styles globaux pour le header */
 .primary-modal .ant-modal-header {
     margin: -24px -24px 0px -24px !important;
-    padding: 24px !important;
+    padding: 16px !important;
     background: rgb(70, 166, 99) !important;
 }
 .primary-modal .ant-modal-header .ant-modal-title {
