@@ -19,7 +19,7 @@ class BaseRepository implements CrudInterface
         $this->model = $model;
     }
 
-    public function fetchData(array $relations = [], array $filters = [], array $scopes = [], string $value = 'id', string $label = '', ?callable $customQuery = null , array $dataOrderBy = []): mixed
+    public function fetchData(array $relations = [], array $filters = [], array $scopes = [], string $value = 'id', string $label = '', ?callable $customQuery = null, array $dataOrderBy = []): mixed
     {
         $query = $this->model->newQuery();
         // si existe des relations
@@ -44,22 +44,25 @@ class BaseRepository implements CrudInterface
         $results = $query->get();
         if ($label) {
             $results = $results->map(function ($item) use ($value, $label) {
-                return method_exists($item, 'toValueTextArray')
-                    ? $item->toValueTextArray($value, $label)
-                    : $item;
+                if (method_exists($item, 'toValueTextArray')) {
+                    return $item->toValueTextArray($value, $label);
+                }
+                // Fallback: map to generic { value, label } using provided fields
+                $val = data_get($item, $value);
+                $lab = data_get($item, $label);
+                return ['value' => $val, 'label' => $lab];
             });
         }
         return $results;
     }
 
     protected function applyOrderBy($query, array $dataOrderBy = [])
-
     {
         $orderBy = $dataOrderBy['order_by'] ?? $this->orderByColumn;
         $orderDirection = $dataOrderBy['order_direction'] ?? $this->orderByDirection;
 
         $orderDirection = in_array(strtolower($orderDirection), ['asc', 'desc']) ? strtolower($orderDirection) : 'asc';
-        if ($orderBy){
+        if ($orderBy) {
             $query->orderBy($orderBy, $orderDirection);
         }
     }

@@ -3,17 +3,32 @@
 namespace App\Http\Controllers;
 
 use App\Models\Societe;
+use App\Services\SocieteService;
+use App\Utils\ExtractSocieteFiltre;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class SocieteController extends Controller
 {
+    private SocieteService $societeService;
+    public function __construct( SocieteService $societeService)
+    {
+        $this->societeService = $societeService;
+    }
     /**
      * Display a listing of the resource.
      */
-     public function index()
+     public function index(Request $request)
     {
-        return Inertia::render("Societe/ListedesSociété_");
+        $filtre = ExtractSocieteFiltre::extractFilter($request);
+        $data = $this->societeService->getAll($filtre);
+        return Inertia::render("Societe/ListedesSociété_",
+        [
+            "data"=> $data,
+            "filters" => [],
+            "flash" => session('flash', [])
+        ]);
     }
 
     public function suivi()
@@ -50,7 +65,22 @@ class SocieteController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name' => ['required','string','max:255',Rule::unique('societes')->whereNull('deleted_at')],
+            'nom_contact' => 'nullable|string|max:255',
+            'nif' => 'nullable|string|max:255',
+            'stat' => 'nullable|string|max:255',
+            'adresse' => 'nullable|string|max:500',
+            'telephone' => 'nullable|string|max:20',
+            'email' => 'nullable|email|max:255',
+            'status' => 'nullable|string|in:actif,inactif',
+            'img' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120'
+        ]);
+        $result = $this->societeService->createSociete($validated);
+        return back()->with(
+            $result['error'] ? 'message.error' : 'message.success',
+            $result['message']
+        );
     }
 
     /**
@@ -58,7 +88,11 @@ class SocieteController extends Controller
      */
     public function show(Societe $societe)
     {
-        //
+        return back()->with([
+            'flash' => [
+                'data' => $societe
+            ]
+        ]);
     }
 
     /**
@@ -74,7 +108,26 @@ class SocieteController extends Controller
      */
     public function update(Request $request, Societe $societe)
     {
-        //
+        $validated = $request->validate([
+            'name' => ['required','string','max:255',Rule::unique('societes')
+            ->ignore($societe->id)
+            ->whereNull('deleted_at'),],
+            'nom_contact' => 'nullable|string|max:255',
+            'nif' => 'nullable|string|max:255',
+            'stat' => 'nullable|string|max:255',
+            'adresse' => 'nullable|string|max:500',
+            'telephone' => 'nullable|string|max:20',
+            'email' => 'nullable|email|max:255',
+            'status' => 'nullable|string|in:actif,inactif',
+            'img' => 'nullable'
+        ]);
+
+        $result = $this->societeService->updateSociete($societe, $validated);
+
+        return back()->with(
+            $result['error'] ? 'message.error' : 'message.success',
+            $result['message']
+        );
     }
 
     /**
@@ -82,6 +135,10 @@ class SocieteController extends Controller
      */
     public function destroy(Societe $societe)
     {
-        //
+        $result = $this->societeService->deleteSociete($societe);
+        return back()->with(
+            $result['error'] ? 'message.error' : 'message.success',
+            $result['message']
+        );
     }
 }

@@ -1,57 +1,25 @@
-<script setup lang="ts">
+<script setup>
 import { MoreOutlined } from '@ant-design/icons-vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { router } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
-// Types
-interface Action<T> {
-    label: string;
-    icon?: any;
-    onClick: (record: T) => void;
-    visible?: (record: T) => boolean;
-    disabled?: (record: T) => boolean;
-    classStyle?: string;
-    privilege?: string | (() => string);
-}
-
-interface Column<T> {
-    key: string;
-    label: string;
-    align?: 'left' | 'center' | 'right';
-    width?: number;
-    render?: (record: T, index: number) => any;
-}
-
-interface DataTableProps<T> {
-    data: {
-        data: T[];
-        current_page: number;
-        last_page: number;
-        per_page: number;
-        total: number;
-    };
-    columns: Column<T>[];
-    actions?: Action<T>[];
-    filters?: Record<string, any>;
-    endpoint?: string;
-    actionOnDropdown?: boolean;
-    selectableRows?: boolean;
-    selectedIds?: (string | number)[];
-    onSelectionChange?: (keys: (string | number)[]) => void;
-}
-
 // Props
-const props = withDefaults(defineProps<DataTableProps<any>>(), {
-    actions: () => [],
-    filters: () => ({}),
-    actionOnDropdown: true,
-    selectableRows: false,
-    selectedIds: () => [],
+const props = defineProps({
+    data: { type: Object, required: true },
+    columns: { type: Array,required: true },
+    actions: { type: Array, default: () => [] },
+    filters: { type: Object, default: () => ({}) },
+    endpoint: { type: String, default: '' },
+    actionOnDropdown: { type: Boolean, default: true },
+    selectableRows: { type: Boolean, default: false },
+    selectedIds: { type: Array, default: () => [] },
+    onSelectionChange: { type: Function, default: null }
 });
 
 // Computed
 const startIndex = computed(() => (props.data.current_page - 1) * props.data.per_page);
+const filterParams = computed(()=> props.filters || {});
 
 const antdColumns = computed(() => {
     const columns = props.columns.map((col) => {
@@ -77,7 +45,7 @@ const antdColumns = computed(() => {
             width: colWidth,
             ellipsis: true,
             render: col.render,
-        } as any;
+        };
     });
 
     // Add actions column if actions exist
@@ -89,7 +57,7 @@ const antdColumns = computed(() => {
             width: props.actionOnDropdown ? 50 : 100,
             fixed: 'right',
             ellipsis: false,
-        } as any);
+        });
     }
 
     return columns;
@@ -98,7 +66,7 @@ const antdColumns = computed(() => {
 const paginationPages = computed(() => {
     const currentPage = props.data.current_page;
     const lastPage = props.data.last_page;
-    const pages: (number | string)[] = [];
+    const pages = [];
 
     if (lastPage <= 5) {
         for (let i = 1; i <= lastPage; i++) pages.push(i);
@@ -120,18 +88,18 @@ const rowSelection = computed(() => {
 
     return {
         selectedRowKeys: props.selectedIds,
-        onChange: (keys: (string | number)[]) => {
+        onChange: (keys) => {
             props.onSelectionChange?.(keys);
         },
     };
 });
 
 // Methods
-const handlePageChange = (pageNum: number) => {
+const handlePageChange = (pageNum) => {
     if (props.endpoint) {
         router.get(
             props.endpoint,
-            { page: pageNum, ...props.filters },
+            { page: pageNum, ...filterParams.value },
             {
                 preserveState: true,
                 preserveScroll: true,
@@ -140,17 +108,17 @@ const handlePageChange = (pageNum: number) => {
     }
 };
 
-const isActionVisible = (action: Action<any>, row: any) => {
+const isActionVisible = (action, row) => {
     // Simplified visibility check without permissions for now
     if (action.visible !== undefined) return action.visible(row);
     return true;
 };
 
-const isActionDisabled = (action: Action<any>, row: any) => {
+const isActionDisabled = (action, row) => {
     return action.disabled ? action.disabled(row) : false;
 };
 
-const visibleActions = (record: any): Action<any>[] => {
+const visibleActions = (record) => {
     return props.actions.filter((action) => isActionVisible(action, record));
 };
 </script>
@@ -179,9 +147,8 @@ const visibleActions = (record: any): Action<any>[] => {
 }
 
 .custom-table :deep(.ant-table-thead > tr > th) {
-    background-color: rgb(70, 166, 99) !important;
-
     padding: 8px !important;
+    background-color: rgb(70, 166, 99) !important;
     color: #ffffff !important;
     white-space: nowrap !important;
 }
@@ -211,9 +178,10 @@ const visibleActions = (record: any): Action<any>[] => {
     width: 100% !important;
 }
 
-/*voir les largeurs colonnes */
-.custom-table :deep(.ant-table-thead > tr > th) {
-    position: relative;
+/* Supprimer les separateurs des colonnes des */
+.custom-table :deep(.ant-table-thead .ant-table-cell.ant-table-cell-ellipsis::before) {
+    background-color: transparent !important;
+    display: none !important;
 }
 /* taille du checkbox */
 .custom-table :deep(.ant-checkbox-inner) {
@@ -230,9 +198,9 @@ const visibleActions = (record: any): Action<any>[] => {
                 :data-source="data.data"
                 :columns="antdColumns"
                 :pagination="false"
-                :row-key="(record: any) => record.id"
+                :row-key="(record) => record.id"
                 sticky
-                :scroll="{ x: 'max-content', y: 'max-content' }"
+                :scroll="{ x: 'max-content', y:500 }"
                 :row-selection="rowSelection"
                 :table-layout="'fixed'"
                 class="custom-table"
@@ -242,7 +210,7 @@ const visibleActions = (record: any): Action<any>[] => {
                     <template v-if="column.key === 'actions'">
                         <div v-if="visibleActions(record).length > 0" class="flex justify-end">
                             <!-- Dropdown mode -->
-                            <a-dropdown v-if="actionOnDropdown && visibleActions.length > 0" :trigger="['click']" class="!text-center">
+                            <a-dropdown v-if="actionOnDropdown && visibleActions.length > 0" :trigger="['click']" class="text-center">
                                 <a-button size="small" >
                                     <template #icon>
                                         <MoreOutlined />
@@ -298,7 +266,7 @@ const visibleActions = (record: any): Action<any>[] => {
 
             <!-- Custom Pagination -->
             <div class="custom-table-pagination px-6 py-2">
-                <div class="flex items-center justify-end gap-4 text-sm text-gray-600">
+                <div class="flex md:flex-row flex-col  items-center justify-center md:justify-end gap-4 text-sm text-gray-600">
                     <div class="flex items-center space-x-2">
                         <span class="text-gray-500">Page</span>
                         <span class="rounded-md bg-blue-50 px-2 py-1 font-semibold text-gray-900">{{ data.current_page }}</span>

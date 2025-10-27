@@ -88,17 +88,25 @@ abstract class BaseImgService extends BaseService
         try {
             // Séparer les données d'images des autres données
             $imageFiles = $this->extractImageFiles($validated);
-            // Supprimer les fichiers d'images des données validée
+            // Supprimer les fichiers d'images des données validée (mais garder les null)
             $entityData = $this->removeImageFiles($validated);
+
             // Récupérer les anciens chemins d'images de l'entité
             $oldImagePaths = $this->getOldImagePaths($model);
 
-            // Mettre à jour les données de l'entité
+            // Mettre à jour les données de l'entité (inclut les champs null pour suppression)
             $this->repository->update($model, $entityData);
 
-            // Gérer les images si fournies
+            // Supprimer les anciennes images si on a de nouveaux fichiers ou si on supprime
+            if (!empty($imageFiles) || $this->hasImageDeletions($validated)) {
+                if (!empty($oldImagePaths)) {
+                    $this->imageService->deleteMultipleImages($oldImagePaths);
+                }
+            }
+
+            // Gérer les nouvelles images si fournies
             if (!empty($imageFiles)) {
-                $imageResult = $this->processImages($imageFiles, $model, $oldImagePaths);
+                $imageResult = $this->processImages($imageFiles, $model, []);
 
                 if (!$imageResult['success']) {
                     return $this->errorResponse('Erreur lors de l\'upload des images : ' . $imageResult['error'], new Exception($imageResult['error']));
@@ -125,10 +133,10 @@ abstract class BaseImgService extends BaseService
     {
         try {
             // Supprimer les images associées
-            $imagePaths = $this->getOldImagePaths($model);
-            if (!empty($imagePaths)) {
-                $this->imageService->deleteMultipleImages($imagePaths);
-            }
+            // $imagePaths = $this->getOldImagePaths($model);
+            // if (!empty($imagePaths)) {
+            //     $this->imageService->deleteMultipleImages($imagePaths);
+            // }
 
             // Supprimer l'entité
             $this->repository->delete($model);
@@ -170,7 +178,10 @@ abstract class BaseImgService extends BaseService
         $entityData = $validated;
 
         foreach ($this->imageFields as $field) {
-            unset($entityData[$field]);
+            // Ne pas supprimer les champs null (suppression d'image)
+            if (isset($validated[$field]) && $validated[$field] !== null) {
+                unset($entityData[$field]);
+            }
         }
 
         return $entityData;
@@ -350,5 +361,21 @@ abstract class BaseImgService extends BaseService
     {
         $this->imageFields = $fields;
         return $this;
+    }
+
+    /**
+     * Vérifie s'il y a des suppressions d'images (champs null)
+     *
+     * @param array $validated
+     * @return bool
+     */
+    protected function hasImageDeletions(array $validated): bool
+    {
+        foreach ($this->imageFields as $field) {
+            if (isset($validated[$field]) && $validated[$field] === null) {
+                return true;
+            }
+        }
+        return false;
     }
 }

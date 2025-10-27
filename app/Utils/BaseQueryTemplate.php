@@ -4,7 +4,7 @@ namespace App\Utils;
 
 use Illuminate\Database\Eloquent\Builder;
 
-class BaseQueryTemplate
+trait BaseQueryTemplate
 {
     /**
      * @param Builder $query
@@ -14,12 +14,11 @@ class BaseQueryTemplate
      */
     public static function apply(Builder $query, array $filter, array $filterScope = []): Builder
     {
-
         foreach ($filterScope as $scope => $key){
-            if (array_key_exists($key, $filter) ){
-
+            if (array_key_exists($key, $filter) && !empty($filter[$key])){
                 $query->{$scope}($filter[$key]);
             }
+
         }
         return  $query;
     }
