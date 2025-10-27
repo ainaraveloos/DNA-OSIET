@@ -152,14 +152,7 @@ const wrapClassName = computed(() =>
     overflow: auto !important;
 }
 
-/* Styles globaux pour le footer */
-.primary-modal .ant-modal-footer {
-    position: sticky;
-    bottom: 0;
-    z-index: 1;
-    padding: 16px 24px;
-    margin: 0 -24px -16px -24px;
-}
+
 .full-modal .ant-modal-footer {
     position: sticky;
     bottom: 0;

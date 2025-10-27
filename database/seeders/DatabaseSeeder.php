@@ -20,10 +20,5 @@ class DatabaseSeeder extends Seeder
             'email' => 'contact@dna.mg',
             'password'=> 'password',
         ]);
-
-        // Seeder pour les sociétés
-        $this->call([
-            SocieteSeeder::class,
-        ]);
     }
 }

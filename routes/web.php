@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\SocieteController;
+use App\Http\Controllers\SalarieController;
 use App\Http\Controllers\AyantsendroitsController; // ← AJOUTER ICI
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -17,7 +18,6 @@ Route::get('dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::resource("societe",SocieteController::class);
 // Route::get('/societe', [SocieteController::class, 'index'])->name('societe.index');
 // Route::get('/societe/suivi', [SocieteController::class, 'suivi'])->name('societe.suivi');
 // Route::get('/societe/histori', [SocieteController::class, 'histori'])->name('societe.histori');

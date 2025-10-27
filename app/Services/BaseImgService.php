@@ -133,10 +133,10 @@ abstract class BaseImgService extends BaseService
     {
         try {
             // Supprimer les images associées
-            $imagePaths = $this->getOldImagePaths($model);
-            if (!empty($imagePaths)) {
-                $this->imageService->deleteMultipleImages($imagePaths);
-            }
+            // $imagePaths = $this->getOldImagePaths($model);
+            // if (!empty($imagePaths)) {
+            //     $this->imageService->deleteMultipleImages($imagePaths);
+            // }
 
             // Supprimer l'entité
             $this->repository->delete($model);

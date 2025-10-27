@@ -4,7 +4,7 @@
         :titre="titre"
         ok-text="Enregistrer"
         :loading="loading"
-        size="full_screen"
+        size="lg"
         :show-footer="true"
         @submit="handleSubmit"
         @close="handleClose"
@@ -48,21 +48,20 @@
                             />
                         </FormItem>
 
-                        <!-- Ligne 2: Secteur d'activité -->
+                        <!-- Ligne 2: Nom du contact -->
                         <FormItem
-                            label="Secteur d'Activité"
-                            :help="form.errors.secteur"
+                            label="Nom du Contact"
+                            :help="form.errors.nom_contact"
                         >
                             <FormInput
-                                v-model="form.secteur"
+                                v-model="form.nom_contact"
                                 variant="input"
                                 size="large"
-                                placeholder="Ex: Santé, Finance, Technologie"
+                                placeholder="Nom du contact"
                                 :disabled="isViewMode"
                             />
                         </FormItem>
-
-                        <!-- Ligne 3: Email + Téléphone -->
+                        <!-- Ligne 4: Email + Téléphone -->
                         <a-row :gutter="16">
                             <a-col :xs="24" :sm="12">
                                 <FormItem
@@ -109,7 +108,7 @@
                             />
                         </FormItem>
 
-                        <!-- Ligne 5: NIF + STAT -->
+                        <!-- Ligne 6: NIF + STAT -->
                         <a-row :gutter="16">
                             <a-col :xs="24" :sm="12">
                                 <FormItem
@@ -141,7 +140,7 @@
                             </a-col>
                         </a-row>
 
-                        <!-- Ligne 6: Statut -->
+                        <!-- Ligne 7: Statut -->
                         <FormItem
                             label="Statut"
                             :help="form.errors.status"
@@ -153,9 +152,8 @@
                                 class="w-full"
                                 :disabled="isViewMode"
                             >
-                                <a-select-option value="Actif">Actif</a-select-option>
-                                <a-select-option value="Inactif">Inactif</a-select-option>
-                                <a-select-option value="Suspendu">Suspendu</a-select-option>
+                                <a-select-option value="actif">Actif</a-select-option>
+                                <a-select-option value="inactif">Inactif</a-select-option>
                             </a-select>
                         </FormItem>
                     </div>
@@ -189,14 +187,14 @@ const imgPreview = ref(null)
 const form = useForm({
     id: props.initialData.id || null,
     name: props.initialData.name || '',
-    secteur: props.initialData.secteur || '',
+    nom_contact: props.initialData.nom_contact || '',
     nif: props.initialData.nif || '',
     stat: props.initialData.stat || '',
     adresse: props.initialData.adresse || '',
     telephone: props.initialData.telephone || '',
     email: props.initialData.email || '',
-    status: props.initialData.status || 'Actif',
-    img: null
+    status: props.initialData.status || 'actif',
+    img: props.initialData.img || null
 })
 
 
@@ -207,19 +205,22 @@ const titre = computed(() => {
 // Gestion de l'upload d'image
 const handlePhotoUpload = (file) => {
     form.img = file
-    if (file) {
-        // Créer un preview de l'image
-        const reader = new FileReader()
-        reader.onload = (e) => {
-            imgPreview.value = e.target.result
-        }
-        reader.readAsDataURL(file)
-    }
+
 }
 
 // Gestion de la suppression d'image
 const handlePhotoRemove = () => {
     form.img = null
+    imgPreview.value = null
+}
+
+//Nouveau Societe
+function addNew() {
+    visible.value = true
+    // Reset du formulaire pour un nouvel ajout
+    form.reset()
+    form.clearErrors()
+    form.id = null
     imgPreview.value = null
 }
 
@@ -232,17 +233,12 @@ const update = (rowData) => {
         onSuccess: (response) => {
             const responseData = response.props.flash.data
             Object.keys(responseData).forEach(key => {
-                if (form.hasOwnProperty(key)) {
-                    form[key] = responseData[key]
-                }
+                if (form.hasOwnProperty(key)) { form[key] = responseData[key] }
             })
 
             // Mettre à jour l'image preview si une image existe
-            if (responseData.image_url) {
-                imgPreview.value = responseData.image_url
-            } else {
-                imgPreview.value = null
-            }
+            if (responseData.image_url) { imgPreview.value = responseData.image_url }
+            else { imgPreview.value = null }
 
             visible.value = true
         },
@@ -257,35 +253,16 @@ async function handleSubmit() {
         const method = form.id ? 'put' : 'post'
         const url = form.id ? route('societe.update', form.id) : route('societe.store')
 
-        form.transform(data => ({
-            ...data,
-            _method: method.toUpperCase()
-        })).post(url, {
-            onSuccess: () => {
-                handleClose()
-            },
-            onError: (errors) => {
-                console.error('Erreurs de validation:', errors)
-                form.errors = errors
-            },
+        form.transform(data => ({ ...data,  _method: method.toUpperCase()})).post(url, {
+            onSuccess: () => { handleClose() },
+            onError: (errors) => { form.errors = errors},
             forceFormData: true
         })
 
-    } catch (error) {
-        console.error('Erreur lors de la soumission:', error)
-    } finally {
-        loading.value = false
-    }
+    } catch (error) { console.error('Erreur lors de la soumission:', error) }
+    finally { loading.value = false }
 }
-//Nouveau Societe
-function addNew() {
-    visible.value = true
-    // Reset du formulaire pour un nouvel ajout
-    form.reset()
-    form.clearErrors()
-    form.id = null
-    imgPreview.value = null
-}
+
 function handleClose() {
     visible.value = false
     imgPreview.value = null

@@ -6,6 +6,7 @@ use App\Models\Societe;
 use App\Services\SocieteService;
 use App\Utils\ExtractSocieteFiltre;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class SocieteController extends Controller
@@ -65,14 +66,14 @@ class SocieteController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'secteur' => 'nullable|string|max:255',
+            'name' => ['required','string','max:255',Rule::unique('societes')->whereNull('deleted_at')],
+            'nom_contact' => 'nullable|string|max:255',
             'nif' => 'nullable|string|max:255',
             'stat' => 'nullable|string|max:255',
             'adresse' => 'nullable|string|max:500',
             'telephone' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255',
-            'status' => 'nullable|string|in:Actif,Inactif,Suspendu',
+            'status' => 'nullable|string|in:actif,inactif',
             'img' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120'
         ]);
         $result = $this->societeService->createSociete($validated);
@@ -108,15 +109,17 @@ class SocieteController extends Controller
     public function update(Request $request, Societe $societe)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'secteur' => 'nullable|string|max:255',
+            'name' => ['required','string','max:255',Rule::unique('societes')
+            ->ignore($societe->id)
+            ->whereNull('deleted_at'),],
+            'nom_contact' => 'nullable|string|max:255',
             'nif' => 'nullable|string|max:255',
             'stat' => 'nullable|string|max:255',
             'adresse' => 'nullable|string|max:500',
             'telephone' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255',
-            'status' => 'nullable|string|in:Actif,Inactif,Suspendu',
-            'img' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120'
+            'status' => 'nullable|string|in:actif,inactif',
+            'img' => 'nullable'
         ]);
 
         $result = $this->societeService->updateSociete($societe, $validated);
@@ -133,17 +136,9 @@ class SocieteController extends Controller
     public function destroy(Societe $societe)
     {
         $result = $this->societeService->deleteSociete($societe);
-
-        if ($result['success']) {
-            return redirect()->route('societe.index')->with('flash', [
-                'type' => 'success',
-                'message' => $result['message']
-            ]);
-        }
-
-        return back()->with('flash', [
-            'type' => 'error',
-            'message' => $result['message'] ?? 'Erreur lors de la suppression'
-        ]);
+        return back()->with(
+            $result['error'] ? 'message.error' : 'message.success',
+            $result['message']
+        );
     }
 }
