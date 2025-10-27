@@ -214,9 +214,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { router } from "@inertiajs/vue3";
-import AppSidebarHeader from './AppSidebarHeader.vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 
 interface SubmenuItem {
   label: string
@@ -256,7 +255,7 @@ const alt = () => {
 }
 
 const LAD = () => {
-  router.get(route("AyantsEndroit.LAD"));
+  router.get(route("ayantdroit.index"));
 }
 
 const Badges = () => {

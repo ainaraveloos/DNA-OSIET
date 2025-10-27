@@ -14,7 +14,7 @@ withDefaults(defineProps<Props>(), {
     breadcrumbs: () => [],
 });
 
-import { ref, onMounted } from 'vue'
+import { onMounted, ref } from 'vue';
 
 const scrollContainer = ref<HTMLElement | null>(null)
 const isScrolled = ref(false)

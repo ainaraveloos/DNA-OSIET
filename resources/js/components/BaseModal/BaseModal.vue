@@ -9,7 +9,7 @@
         :ok-text="okText"
         cancel-text="Fermer"
         :confirm-loading="loading"
-        :mask-closable="false"
+        :mask-closable="true"
         :closable="!loading"
         :cancel-button-props="{ disabled: loading }"
         :width="modalWidths[size]"
@@ -112,8 +112,8 @@ const wrapClassName = computed(() =>
 }
 /* Styles globaux pour le header */
 .primary-modal .ant-modal-header {
-    margin: -24px -24px 24px -24px !important;
-    padding: 16px 24px !important;
+    margin: -24px -24px 0px -24px !important;
+    padding: 16px !important;
     background: rgb(70, 166, 99) !important;
 }
 .primary-modal .ant-modal-header .ant-modal-title {
@@ -130,8 +130,8 @@ const wrapClassName = computed(() =>
 }
 /* Styles spécifiques pour full-screen */
 .full-modal .ant-modal-header {
-    margin: -24px -24px 24px -24px !important;
-    padding: 16px 24px !important;
+    margin: -24px -24px 0px -24px !important;
+    padding: 24px !important;
     background: rgb(70, 166, 99) !important;
 }
 
@@ -152,14 +152,7 @@ const wrapClassName = computed(() =>
     overflow: auto !important;
 }
 
-/* Styles globaux pour le footer */
-.primary-modal .ant-modal-footer {
-    position: sticky;
-    bottom: 0;
-    z-index: 1;
-    padding: 16px 24px;
-    margin: 0 -24px -16px -24px;
-}
+
 .full-modal .ant-modal-footer {
     position: sticky;
     bottom: 0;
